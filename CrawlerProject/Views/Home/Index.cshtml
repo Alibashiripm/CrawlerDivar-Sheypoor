@@ -1,0 +1,262 @@
+﻿@inject CrawlerProject.Services.CitiesService _citiesService ;
+@{
+    var cities = await _citiesService.ReadCityJsonFile();
+}
+<header class="main-header">
+    <!-- Start ads -->
+    @*       <div class="ads-header-wrapper">
+    <a href="#" class="ads-header hidden-sm" target="_blank"
+    style="background-image: url(./assets/img/banner/large-ads.jpg)"></a>
+    </div>*@
+    <!-- End ads -->
+    <!-- Start topbar -->
+    <div class="container main-container">
+        <div class="topbar dt-sl">
+            <div class="row">
+                <div class="col-lg-2 col-md-3 col-6">
+                    <div class="logo-area">
+                        <a href="#">
+                            <img src="" alt="">
+                        </a>
+                    </div>
+                </div>
+                <div class="col-lg-6 col-md-5 hidden-sm">
+                    <div class="search-area dt-sl">
+                        <form action="" class="search">
+                            <input id="searchInput" type="text" placeholder="نام کالا، برند و یا دسته مورد نظر خود را جستجو کنید…">
+                            <button class="close-search-result" type="submit">
+                                <i class="far fa-search search-icon"></i>
+                            </button>
+                        </form>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <!-- End topbar -->
+    <!-- Start bottom-header -->
+    <div class="bottom-header dt-sl mb-sm-bottom-header">
+        <div class="container main-container">
+        </div>
+    </div>
+    <!-- End bottom-header -->
+</header>
+<main class="main-content dt-sl mb-3">
+    <div class="container main-container">
+        <div class="row" >
+            <!-- Start Sidebar -->
+            <div class="col-lg-3 col-md-12 col-sm-12 sticky-sidebar filter-options-sidebar">
+                <div class="d-md-none">
+                    <div class="header-filter-options">
+                        <span>جستجوی پیشرفته <i class="fad fa-sliders-h"></i></span>
+                        <button class="btn-close-filter-sidebar"><i class="fal fa-times"></i></button>
+                    </div>
+                </div>
+                <div class="dt-sn dt-sn--box mb-3">
+                    <form action="">
+                        <div class="col-12">
+                            <div class="section-title text-sm-title title-wide mb-1 no-after-title-wide">
+                                <h2>انتخاب شهر</h2>
+                            </div>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <div class="widget-search">
+                                <input type="text" id="textcity" name="s" placeholder="نام شهر مورد نظر را بنویسید...">
+                                <button class="btn-search-widget">
+                                    <img src="./assets/img/theme/search.png" alt="">
+                                </button>
+                                <div id="resultList" class="search-result open">
+                                    @foreach (var item in cities)
+                                    {
+                                        <a id="@item.slug" data-city="@item.slug">
+                                            <div class="custom-control custom-checkbox">
+                                                <input type="checkbox" class="custom-control-input" id="customCheck1">
+                                                <label class="custom-control-label" for="customCheck1">@item.title</label>
+                                            </div>
+                                        </a>
+                                    }
+                                </div>
+                            </div>
+                        </div>   
+                     
+                    </form>
+                </div>
+            </div>
+            <!-- End Sidebar -->
+            <!-- Start Content -->
+            <div class="col-lg-9 col-md-12 col-sm-12 search-card-res" style="  position: relative;">
+                <div class="d-md-none">
+                    <button class="btn-filter-sidebar">
+                        جستجوی پیشرفته <i class="fad fa-sliders-h"></i>
+                    </button>
+                </div>
+                <div class="dt-sl dt-sn px-0 search-amazing-tab">
+                    <div class="ah-tab-content-wrapper dt-sl px-res-0">
+                        <div class="ah-tab-content dt-sl" data-ah-tab-active="true">
+                            <div class="row mb-3 mx-0 px-res-0 product-list" id="product-list">
+                            </div>
+                        
+                        </div>
+                    </div>
+              
+
+                </div>
+               
+            </div>
+            <!-- End Content -->
+          
+        </div>
+    
+    </div>
+</main>
+
+<script>
+    $(document).ready(function () {
+        var isLoading = false; // Flag to prevent multiple simultaneous requests
+        var pageNumber = 1; // Initial page number
+        var cityName = "tehran";
+        var searchQuery = "";
+
+        // Function to load more content
+        function loadMoreContent() {
+         
+            if (!isLoading) {
+                isLoading = true;
+ showLoader();
+                // AJAX request
+                $.ajax({
+                    url: '/Home/GetPosts',
+                    data: {
+                        id: pageNumber,
+                        cityName: cityName,
+                        searchQuery: searchQuery
+                    },
+                    type: 'GET',
+                    success: function (data) {
+                        var productList = $('#product-list'); // DOM element to append the new content
+ 
+                        // Check if data is an array
+                        if (Array.isArray(data)) {
+                            // Process the received data
+                            data.forEach(function (item) {
+                                console.log(item.imageName);
+                                var html = `
+                                            <div class="col-lg-3 col-md-4 col-sm-6 col-12 px-10 mb-1 px-res-0">
+                                                <div class="product-card mb-2 mx-res-0">
+                                                    <div class="promotion-badge">
+                                                ${item.siteName}
+                                                    </div>
+                                                    <a class="product-thumb" href="${item.link}">
+                                                            <img  style="min-height:197.96px;min-width:197.96px" src="${item.imageName}" alt="Product Thumbnail">
+                                                    </a>
+                                                    <div class="product-card-body">
+                                                        <h5 class="product-title">
+                                                            <a href="${item.link}">${item.titles}</a>
+                                                        </h5>
+                                                        <a class="product-meta" href="${item.link}">${item.description}</a>
+                                                        <span class="product-price">${item.bottomDescription}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        `;
+
+                                // Append the new content
+                                productList.append(html);
+                             });
+
+                            isLoading = false; // Reset the isLoading flag
+                            pageNumber++; // Increment the page number for the next request
+                            hideLoader();
+                        } else {
+                            console.log('Error: Data is not an array');
+                        }
+                    },
+                    error: function (error) {
+                        console.log('Error:', error);
+                        isLoading = false; // Reset the isLoading flag in case of an error
+                    }
+                });
+             }
+        }
+
+        // Event listener for scroll
+        loadMoreContent();
+
+        $(window).scroll(function () {
+            if ($(window).innerHeight() + $(window).scrollTop() >= $(document).height() - 100) {
+                showLoader(); // Call the function to show the loader
+                loadMoreContent();
+            }
+        });
+
+        function showLoader() {
+            $('.loader-container').css('display', 'block'); // Set the display property to "block" or any other suitable value
+        }
+
+        function hideLoader() {
+            $('.loader-container').css('display', 'none'); // Add a class to hide the loader element
+        }
+        // Event listener for clicking the <a> tags
+        $('a[data-city]').click(function (event) {
+            event.preventDefault(); // Prevent the default link behavior
+            cityName = $(this).data('city'); // Set the cityName to the data-city attribute value
+            pageNumber = 1; // Reset the page number
+            $('#product-list').empty(); // Clear the existing content
+            loadMoreContent(); // Load new content
+        });
+
+        // Event listener for form submission
+        $('.search').submit(function (event) {
+            event.preventDefault(); // Prevent the default form submission
+            searchQuery = $('#searchInput').val().trim(); // Get the value of the search input
+            pageNumber = 1; // Reset the page number
+            $('#product-list').empty(); // Clear the existing content
+
+            loadMoreContent(); // Load new content
+        });
+    });
+</script>
+
+
+
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var inputElement = document.getElementById('textcity');
+        var resultList = document.getElementById('resultList');
+
+        inputElement.addEventListener('input', function (event) {
+            var keyword = event.target.value.trim();
+
+            if (keyword === "") {
+                resultList.style.display = 'none';
+            } else {
+                var listItems = resultList.querySelectorAll('div');
+                var hasResults = false;
+
+                for (var i = 0; i < listItems.length; i++) {
+                    var item = listItems[i];
+                    var link = item.querySelector('label');
+                    var title = link.textContent; // Use textContent instead of innerText
+
+                    if (title.includes(keyword)) {
+                        item.style.display = 'block';
+                        hasResults = true;
+                    } else {
+                        item.style.display = 'none';
+                    }
+                }
+
+                if (hasResults) {
+                    resultList.style.display = 'block';
+                } else {
+                    resultList.style.display = 'none';
+                }
+            }
+        });
+
+        // Hide resultList initially
+        resultList.style.display = 'none';
+    });
+</script>
